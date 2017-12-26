@@ -10,12 +10,15 @@ import (
 )
 
 func TestTransaction(t *testing.T) {
+
 	trans := NewCreateTransaction(JsonObj{"Test1": "Test2"}, JsonObj{"Data1": "Data2"})
 	a1 := []PublicKey{{'g', 'o', 'l', 'a', 'n', 'g'}}
 	trans.AddOwnerAfter(a1, 1)
 	trans.AddOwnerBefore(a1, JsonObj{})
 
-	obj, _ := trans.CreateTransaction()
+	trans.Sign()
+
+	obj, _ := trans.Generate()
 	{
 		b, err1 := json.Marshal(obj)
 		if err1 != nil {

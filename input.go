@@ -16,6 +16,13 @@ func (in *input) Generate() []JsonObj {
 	return arr
 }
 
+func (in *input) Sign(message string) error {
+	for _, item := range in.inputItems {
+		item.Sign(message)
+	}
+	return nil
+}
+
 func (in *input) Add(publicKey []PublicKey, fulfill JsonObj) {
 	it := inputItem{}
 	it.ownerBefores = publicKey
@@ -34,6 +41,11 @@ func (i *inputItem) Generate() JsonObj {
 		"fulfills":      i.fulfills,
 		"owners_before": i.ownerBefores,
 	}
+}
+
+func (i *inputItem) Sign(message string) error {
+
+	return nil
 }
 
 func (i *inputItem) creatFulfillment() string {

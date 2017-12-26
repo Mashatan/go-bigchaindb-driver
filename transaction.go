@@ -4,6 +4,8 @@
 
 package GoBigChainDBDriver
 
+import "encoding/json"
+
 const (
 	CREATE   = "CREATE"
 	GENESIS  = "GENSIS"
@@ -53,7 +55,7 @@ func (t *transaction) AddOwnerBefore(publicKey []PublicKey, fulfill JsonObj) err
 	return nil
 }
 
-func (t *transaction) CreateTransaction() (JsonObj, error) {
+func (t *transaction) Generate() (JsonObj, error) {
 
 	tx := JsonObj{
 		"asset":     t.asset,
@@ -64,4 +66,15 @@ func (t *transaction) CreateTransaction() (JsonObj, error) {
 		"version":   VERSION,
 	}
 	return tx, nil
+}
+
+func (t *transaction) dump() string {
+	jo, _ := t.Generate()
+	b, _ := json.Marshal(jo)
+	return string(b)
+}
+
+func (t *transaction) Sign() error {
+	t.input.Sign(t.dump())
+	return nil
 }
