@@ -50,8 +50,8 @@ func (t *transaction) AddOwnerAfter(publicKey []PublicKey, amount int) error {
 	return nil
 }
 
-func (t *transaction) AddOwnerBefore(publicKey []PublicKey, fulfill JsonObj) error {
-	t.input.Add(publicKey, fulfill)
+func (t *transaction) AddOwnerBefore(publicKey []PublicKey, privateKey []PrivateKey) error {
+	t.input.Add(publicKey, privateKey)
 	return nil
 }
 

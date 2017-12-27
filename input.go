@@ -23,16 +23,18 @@ func (in *input) Sign(message string) error {
 	return nil
 }
 
-func (in *input) Add(publicKey []PublicKey, fulfill JsonObj) {
+func (in *input) Add(publicKey []PublicKey, privateKey []PrivateKey) {
 	it := inputItem{}
 	it.ownerBefores = publicKey
-	it.fulfills = fulfill
+	it.ownerPrivates = privateKey
+	it.fulfills = JsonObj{}
 	in.inputItems = append(in.inputItems, it)
 }
 
 type inputItem struct {
-	ownerBefores []PublicKey
-	fulfills     JsonObj
+	ownerBefores  []PublicKey
+	ownerPrivates []PrivateKey
+	fulfills      JsonObj
 }
 
 func (i *inputItem) Generate() JsonObj {
