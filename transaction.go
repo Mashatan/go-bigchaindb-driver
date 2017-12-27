@@ -45,12 +45,12 @@ func NewTransferTransaction(asset JsonObj, metadata JsonObj) transaction {
 	return trasaction
 }
 
-func (t *transaction) AddOwnerAfter(publicKey []PublicKey, amount int) error {
+func (t *transaction) AddOwnerAfter(publicKey *[]PublicKey, amount int) error {
 	t.output.Add(publicKey, amount)
 	return nil
 }
 
-func (t *transaction) AddOwnerBefore(publicKey []PublicKey, privateKey []PrivateKey) error {
+func (t *transaction) AddOwnerBefore(publicKey *[]PublicKey, privateKey *[]PrivateKey) error {
 	t.input.Add(publicKey, privateKey)
 	return nil
 }
@@ -75,6 +75,10 @@ func (t *transaction) dump() string {
 }
 
 func (t *transaction) Sign() error {
-	t.input.Sign(t.dump())
+
+	dm := t.dump()
+	t.input.Sign(dm)
+	t.output.Sign(dm)
+
 	return nil
 }

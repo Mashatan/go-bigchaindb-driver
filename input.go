@@ -4,8 +4,14 @@
 
 package GoBigChainDBDriver
 
+import (
+	gcc "github.com/Mashatan/go-cryptoconditions"
+	base58 "github.com/jbenet/go-base58"
+	"golang.org/x/crypto/ed25519"
+)
+
 type input struct {
-	inputItems []inputItem
+	inputItems []*inputItem
 }
 
 func (in *input) Generate() []JsonObj {
@@ -23,18 +29,30 @@ func (in *input) Sign(message string) error {
 	return nil
 }
 
-func (in *input) Add(publicKey []PublicKey, privateKey []PrivateKey) {
-	it := inputItem{}
+func (in *input) Add(publicKey *[]PublicKey, privateKey *[]PrivateKey) {
+	it := NewInputItem()
 	it.ownerBefores = publicKey
 	it.ownerPrivates = privateKey
-	it.fulfills = JsonObj{}
-	in.inputItems = append(in.inputItems, it)
+	it.ownerSignatures = nil
+	it.fulfills = &JsonObj{}
+	in.inputItems = append(in.inputItems, &it)
 }
 
 type inputItem struct {
-	ownerBefores  []PublicKey
-	ownerPrivates []PrivateKey
-	fulfills      JsonObj
+	ccEd            gcc.Ed25519Sha256
+	ownerBefores    *[]PublicKey
+	ownerPrivates   *[]PrivateKey
+	ownerSignatures *[]Signature
+	fulfills        *JsonObj
+}
+
+func NewInputItem() inputItem {
+	in := inputItem{}
+	in.ownerBefores = nil
+	in.ownerPrivates = nil
+	in.ownerSignatures = nil
+	in.fulfills = nil
+	return in
 }
 
 func (i *inputItem) Generate() JsonObj {
@@ -45,12 +63,25 @@ func (i *inputItem) Generate() JsonObj {
 	}
 }
 
-func (i *inputItem) Sign(message string) error {
-
-	return nil
+func (i *inputItem) Sign(message string) (Signature, error) {
+	if i.ownerPrivates == nil {
+		return nil, nil
+	}
+	priv := (*i.ownerPrivates)[0]
+	sgn := ed25519.Sign(ed25519.PrivateKey(priv), []byte(message))
+	if i.ownerSignatures == nil {
+		i.ownerSignatures = new([]Signature)
+		*(i.ownerSignatures) = append(*(i.ownerSignatures), sgn)
+	}
+	return sgn, nil
 }
 
-func (i *inputItem) creatFulfillment() string {
-
-	return ""
+func (i *inputItem) creatFulfillment() *string {
+	if i.ownerSignatures == nil {
+		return nil
+	}
+	ee, _ := gcc.NewEd25519Sha256((*i.ownerBefores)[0], (*i.ownerSignatures)[0])
+	tt, _ := ee.Encode()
+	ss := string(base58.Encode(tt))
+	return &ss
 }
