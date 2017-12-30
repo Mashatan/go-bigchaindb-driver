@@ -5,6 +5,7 @@
 package GoBigChainDBDriver
 
 import (
+	"bytes"
 	"encoding/hex"
 	"encoding/json"
 )
@@ -72,18 +73,40 @@ func (t *transaction) Generate() (JsonObj, error) {
 	return tx, nil
 }
 
+func (t *transaction) GenerateWithoutId() (JsonObj, error) {
+
+	tx := JsonObj{
+		"asset":     t.asset,
+		"inputs":    t.input.GeneratewithoutSign(),
+		"metadata":  t.metadata,
+		"operation": t.operation,
+		"outputs":   t.output.Generate(),
+		"version":   VERSION,
+	}
+	return tx, nil
+}
+
 func (t *transaction) dump() []byte {
 	jo, _ := t.Generate()
 	b, _ := json.Marshal(jo)
 	return b
 }
+func (t *transaction) createId() string {
+	jo, _ := t.GenerateWithoutId()
+	b, _ := json.Marshal(jo)
+
+	b = bytes.Replace(b, []byte("\\u003c"), []byte("<"), -1)
+	b = bytes.Replace(b, []byte("\\u003e"), []byte(">"), -1)
+	b = bytes.Replace(b, []byte("\\u0026"), []byte("&"), -1)
+	println("TX FOR ID: ", string(b), "\r\n*****\r\n")
+	return hex.EncodeToString(HashData(b))
+}
 
 func (t *transaction) Sign() error {
-
 	dm := t.dump()
-	t.id = hex.EncodeToString(HashData(dm))
-	t.input.Sign(dm)
 	t.output.Sign(dm)
+	t.id = t.createId()
+	t.input.Sign(dm)
 
 	return nil
 }

@@ -5,6 +5,7 @@
 package GoBigChainDBDriver
 
 import (
+	"bytes"
 	"errors"
 	"strconv"
 	"strings"
@@ -53,11 +54,17 @@ func (o *outputItem) Generate() (JsonObj, error) {
 	if n == 0 {
 		return nil, errors.New("no ownersAfter")
 	}
+	var publicList []string
+
+	for _, pk := range *o.ownerAfters {
+		publicList = append(publicList, pk.String())
+	}
+
 	if n == 1 {
 		return JsonObj{
 			"amount":      strconv.Itoa(o.amount),
 			"condition":   o.creatCondition(),
-			"public_keys": o.ownerAfters,
+			"public_keys": publicList,
 		}, nil
 	}
 	return nil, nil
@@ -95,10 +102,15 @@ func (o *outputItem) creatCondition() JsonObj {
 	if o.condition != nil {
 		typestr = strings.ToLower(o.condition.Type().String())
 		uri = o.condition.URI()
+		b := []byte(uri)
+		b = bytes.Replace(b, []byte("\\u003c"), []byte("<"), -1)
+		b = bytes.Replace(b, []byte("\\u003e"), []byte(">"), -1)
+		b = bytes.Replace(b, []byte("\\u0026"), []byte("&"), -1)
+		uri = string(b)
 	}
 	return JsonObj{
 		"details": JsonObj{
-			"public_key": pk,
+			"public_key": pk.String(),
 			"type":       typestr,
 		},
 		"uri": uri,

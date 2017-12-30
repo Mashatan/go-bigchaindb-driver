@@ -22,14 +22,14 @@ func TestBigchain(t *testing.T) {
 
 	//data := JsonObj{"bicycle": JsonObj{"serial_number": "abcd1234", "manufacturer": "bkfab"}}
 
-	info, _ := bcdb.GetServerInfo()
+	/*info, _ := bcdb.GetServerInfo()
 	{
 		b, err1 := json.Marshal(info)
 		if err1 != nil {
 			//t.Fatal(err)
 		}
 		println("Info: ", string(b))
-	}
+	}*/
 
 	trans := NewCreateTransaction(JsonObj{"Test1": "Test2"}, JsonObj{"Data1": "Data2"})
 	pub, priv := GenerateKeypair()

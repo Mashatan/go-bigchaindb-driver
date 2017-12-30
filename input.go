@@ -22,6 +22,14 @@ func (in *input) Generate() []JsonObj {
 	return arr
 }
 
+func (in *input) GeneratewithoutSign() []JsonObj {
+	arr := []JsonObj{}
+	for _, item := range in.inputItems {
+		arr = append(arr, item.Generate())
+	}
+	return arr
+}
+
 func (in *input) Sign(message []byte) error {
 	for _, item := range in.inputItems {
 		item.Sign(message)
@@ -56,10 +64,26 @@ func NewInputItem() inputItem {
 }
 
 func (i *inputItem) Generate() JsonObj {
+	var publicList []string
+	for _, pk := range *i.ownerBefores {
+		publicList = append(publicList, pk.String())
+	}
 	return JsonObj{
 		"fulfillment":   i.creatFulfillment(),
 		"fulfills":      i.fulfills,
-		"owners_before": i.ownerBefores,
+		"owners_before": publicList,
+	}
+}
+
+func (i *inputItem) GeneratewithoutSign() JsonObj {
+	var publicList []string
+	for _, pk := range *i.ownerBefores {
+		publicList = append(publicList, pk.String())
+	}
+	return JsonObj{
+		"fulfillment":   nil,
+		"fulfills":      i.fulfills,
+		"owners_before": publicList,
 	}
 }
 
