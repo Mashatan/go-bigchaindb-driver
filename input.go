@@ -22,7 +22,7 @@ func (in *input) Generate() []JsonObj {
 	return arr
 }
 
-func (in *input) Sign(message string) error {
+func (in *input) Sign(message []byte) error {
 	for _, item := range in.inputItems {
 		item.Sign(message)
 	}
@@ -34,7 +34,7 @@ func (in *input) Add(publicKey *[]PublicKey, privateKey *[]PrivateKey) {
 	it.ownerBefores = publicKey
 	it.ownerPrivates = privateKey
 	it.ownerSignatures = nil
-	it.fulfills = &JsonObj{}
+	it.fulfills = nil
 	in.inputItems = append(in.inputItems, &it)
 }
 
@@ -43,7 +43,7 @@ type inputItem struct {
 	ownerBefores    *[]PublicKey
 	ownerPrivates   *[]PrivateKey
 	ownerSignatures *[]Signature
-	fulfills        *JsonObj
+	fulfills        *JsonObj `json:"fulfills,omitempty"`
 }
 
 func NewInputItem() inputItem {
@@ -63,12 +63,12 @@ func (i *inputItem) Generate() JsonObj {
 	}
 }
 
-func (i *inputItem) Sign(message string) (Signature, error) {
+func (i *inputItem) Sign(message []byte) (Signature, error) {
 	if i.ownerPrivates == nil {
 		return nil, nil
 	}
 	priv := (*i.ownerPrivates)[0]
-	sgn := ed25519.Sign(ed25519.PrivateKey(priv), []byte(message))
+	sgn := ed25519.Sign(ed25519.PrivateKey(priv), message)
 	if i.ownerSignatures == nil {
 		i.ownerSignatures = new([]Signature)
 		*(i.ownerSignatures) = append(*(i.ownerSignatures), sgn)

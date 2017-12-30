@@ -7,6 +7,9 @@ package GoBigChainDBDriver
 import (
 	"errors"
 	"strconv"
+	"strings"
+
+	gcc "github.com/Mashatan/go-cryptoconditions"
 )
 
 type output struct {
@@ -22,7 +25,7 @@ func (ou *output) Generate() []JsonObj {
 	return arr
 }
 
-func (ou *output) Sign(message string) error {
+func (ou *output) Sign(message []byte) error {
 	for _, item := range ou.outputItems {
 		item.Sign(message)
 	}
@@ -31,21 +34,22 @@ func (ou *output) Sign(message string) error {
 
 func (ou *output) Add(publicKey *[]PublicKey, amount int) {
 	ot := outputItem{}
-	ot.ownersAfters = publicKey
+	ot.ownerAfters = publicKey
 	ot.amount = amount
 	ou.outputItems = append(ou.outputItems, &ot)
 }
 
 type outputItem struct {
-	amount       int
-	ownersAfters *[]PublicKey
+	amount      int
+	ownerAfters *[]PublicKey
+	condition   *gcc.Conditions
 }
 
 func (o *outputItem) Generate() (JsonObj, error) {
-	if o.ownersAfters == nil {
+	if o.ownerAfters == nil {
 		return nil, nil
 	}
-	n := len(*o.ownersAfters)
+	n := len(*o.ownerAfters)
 	if n == 0 {
 		return nil, errors.New("no ownersAfter")
 	}
@@ -53,7 +57,7 @@ func (o *outputItem) Generate() (JsonObj, error) {
 		return JsonObj{
 			"amount":      strconv.Itoa(o.amount),
 			"condition":   o.creatCondition(),
-			"public_keys": o.ownersAfters,
+			"public_keys": o.ownerAfters,
 		}, nil
 	}
 	return nil, nil
@@ -71,18 +75,32 @@ func (o *outputItem) Generate() (JsonObj, error) {
 	*/
 }
 
-func (o *outputItem) Sign(message string) error {
+func (o *outputItem) Sign(message []byte) error {
 
+	ee, _ := gcc.NewEd25519Sha256((*o.ownerAfters)[0], nil)
+	o.condition = ee.Condition()
 	return nil
 }
 
 func (o *outputItem) creatCondition() JsonObj {
 
+	var typestr string
+	var uri string
+	var pk PublicKey
+	if o.ownerAfters != nil {
+		if len(*o.ownerAfters) > 0 {
+			pk = (*o.ownerAfters)[0]
+		}
+	}
+	if o.condition != nil {
+		typestr = strings.ToLower(o.condition.Type().String())
+		uri = o.condition.URI()
+	}
 	return JsonObj{
-		"detial": JsonObj{
-			"public_key": "",
-			"type":       "",
+		"details": JsonObj{
+			"public_key": pk,
+			"type":       typestr,
 		},
-		"uri": "",
+		"uri": uri,
 	}
 }

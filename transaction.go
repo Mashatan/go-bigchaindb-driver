@@ -4,7 +4,10 @@
 
 package GoBigChainDBDriver
 
-import "encoding/json"
+import (
+	"encoding/hex"
+	"encoding/json"
+)
 
 const (
 	CREATE   = "CREATE"
@@ -58,6 +61,7 @@ func (t *transaction) AddOwnerBefore(publicKey *[]PublicKey, privateKey *[]Priva
 func (t *transaction) Generate() (JsonObj, error) {
 
 	tx := JsonObj{
+		"id":        t.id,
 		"asset":     t.asset,
 		"inputs":    t.input.Generate(),
 		"metadata":  t.metadata,
@@ -68,15 +72,16 @@ func (t *transaction) Generate() (JsonObj, error) {
 	return tx, nil
 }
 
-func (t *transaction) dump() string {
+func (t *transaction) dump() []byte {
 	jo, _ := t.Generate()
 	b, _ := json.Marshal(jo)
-	return string(b)
+	return b
 }
 
 func (t *transaction) Sign() error {
 
 	dm := t.dump()
+	t.id = hex.EncodeToString(HashData(dm))
 	t.input.Sign(dm)
 	t.output.Sign(dm)
 
