@@ -9,10 +9,6 @@ import (
 	"testing"
 )
 
-var (
-	Alice = "3th33iKfYoPXQ6YL8mXcD3gzgMppEEHFBPFqch4Cn5d3"
-)
-
 func TestBigchain(t *testing.T) {
 	var headers map[string]string
 	headers = make(map[string]string)
@@ -44,7 +40,7 @@ func TestBigchain(t *testing.T) {
 		if err1 != nil {
 			//t.Fatal(err)
 		}
-		println("TX: ", string(b), "\r\n*****\r\n")
+		println("TX: ", string(b), "\r\n++++\r\n")
 	}
 	tx1, err := bcdb.NewTransaction(tx)
 	{

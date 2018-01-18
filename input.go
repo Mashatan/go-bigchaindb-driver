@@ -6,7 +6,6 @@ package GoBigChainDBDriver
 
 import (
 	gcc "github.com/Mashatan/go-cryptoconditions"
-	base58 "github.com/jbenet/go-base58"
 	"golang.org/x/crypto/ed25519"
 )
 
@@ -106,6 +105,6 @@ func (i *inputItem) creatFulfillment() *string {
 	}
 	ee, _ := gcc.NewEd25519Sha256((*i.ownerBefores)[0], (*i.ownerSignatures)[0])
 	tt, _ := ee.Encode()
-	ss := string(base58.Encode(tt))
+	ss := string(Base64UrlEncode(tt))
 	return &ss
 }
