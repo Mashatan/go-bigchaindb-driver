@@ -13,18 +13,12 @@ type input struct {
 	inputItems []*inputItem
 }
 
-func (in *input) Generate() []JsonObj {
+func (in *input) Generate(removeNull bool) []JsonObj {
 	arr := []JsonObj{}
 	for _, item := range in.inputItems {
-		arr = append(arr, item.Generate())
-	}
-	return arr
-}
-
-func (in *input) GeneratewithoutSign() []JsonObj {
-	arr := []JsonObj{}
-	for _, item := range in.inputItems {
-		arr = append(arr, item.Generate())
+		if !removeNull || item != nil {
+			arr = append(arr, item.Generate(removeNull))
+		}
 	}
 	return arr
 }
@@ -62,28 +56,24 @@ func NewInputItem() inputItem {
 	return in
 }
 
-func (i *inputItem) Generate() JsonObj {
+func (i *inputItem) Generate(removeNull bool) JsonObj {
 	var publicList []string
 	for _, pk := range *i.ownerBefores {
 		publicList = append(publicList, pk.String())
 	}
-	return JsonObj{
-		"fulfillment":   i.creatFulfillment(),
-		"fulfills":      i.fulfills,
-		"owners_before": publicList,
-	}
-}
+	ii := JsonObj{}
+	fulfilment := i.creatFulfillment()
+	//if !removeNull || fulfilment != nil {
+	ii["fulfillment"] = fulfilment
+	//}
 
-func (i *inputItem) GeneratewithoutSign() JsonObj {
-	var publicList []string
-	for _, pk := range *i.ownerBefores {
-		publicList = append(publicList, pk.String())
+	//if !removeNull || i.fulfills != nil {
+	ii["fulfills"] = i.fulfills
+	//}
+	if !removeNull || len(publicList) != 0 {
+		ii["owners_before"] = publicList
 	}
-	return JsonObj{
-		"fulfillment":   nil,
-		"fulfills":      i.fulfills,
-		"owners_before": publicList,
-	}
+	return ii
 }
 
 func (i *inputItem) Sign(message []byte) (Signature, error) {
@@ -91,6 +81,8 @@ func (i *inputItem) Sign(message []byte) (Signature, error) {
 		return nil, nil
 	}
 	priv := (*i.ownerPrivates)[0]
+	println("*\n message: ", string(message), "\n*\n")
+
 	sgn := ed25519.Sign(ed25519.PrivateKey(priv), message)
 	if i.ownerSignatures == nil {
 		i.ownerSignatures = new([]Signature)

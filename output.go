@@ -17,11 +17,13 @@ type output struct {
 	outputItems []*outputItem
 }
 
-func (ou *output) Generate() []JsonObj {
+func (ou *output) Generate(removeNull bool) []JsonObj {
 	arr := []JsonObj{}
 	for _, item := range ou.outputItems {
-		it, _ := item.Generate()
-		arr = append(arr, it)
+		it, _ := item.Generate(removeNull)
+		if !removeNull || len(it) != 0 {
+			arr = append(arr, it)
+		}
 	}
 	return arr
 }
@@ -46,7 +48,7 @@ type outputItem struct {
 	condition   *gcc.Conditions
 }
 
-func (o *outputItem) Generate() (JsonObj, error) {
+func (o *outputItem) Generate(removeNull bool) (JsonObj, error) {
 	if o.ownerAfters == nil {
 		return nil, nil
 	}
@@ -61,11 +63,16 @@ func (o *outputItem) Generate() (JsonObj, error) {
 	}
 
 	if n == 1 {
-		return JsonObj{
-			"amount":      strconv.Itoa(o.amount),
-			"condition":   o.creatCondition(),
-			"public_keys": publicList,
-		}, nil
+		oi := JsonObj{}
+		oi["amount"] = strconv.Itoa(o.amount)
+		conditions := o.creatCondition()
+		if !removeNull || conditions != nil {
+			oi["condition"] = conditions
+		}
+		if !removeNull || len(publicList) != 0 {
+			oi["public_keys"] = publicList
+		}
+		return oi, nil
 	}
 	return nil, nil
 	/// NO SUPPORT YET

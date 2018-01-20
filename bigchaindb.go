@@ -40,6 +40,10 @@ func (bc *BigChainDB) request(action string, method string, sendData interface{}
 		if err != nil {
 			return errors.New("error")
 		}
+		b = bytes.Replace(b, []byte("\\u003c"), []byte("<"), -1)
+		b = bytes.Replace(b, []byte("\\u003e"), []byte(">"), -1)
+		b = bytes.Replace(b, []byte("\\u0026"), []byte("&"), -1)
+
 		buf = bytes.NewBuffer(b)
 		req, err = http.NewRequest(strings.ToUpper(method), url, buf)
 	} else {
@@ -64,7 +68,7 @@ func (bc *BigChainDB) request(action string, method string, sendData interface{}
 
 	body, err := ioutil.ReadAll(resp.Body)
 
-	if resp.StatusCode != 200 {
+	if resp.StatusCode < 200 && resp.StatusCode > 202 {
 		//fmt.Println(string(body))
 		return errors.New(string(body))
 	}
@@ -163,6 +167,8 @@ func (bc *BigChainDB) NewTransaction(transaction JsonObj) (string, error) {
 	if err := bc.request(req, "POST", transaction, &response); err != nil {
 		return "", err
 	}
-	//return GetTxId(response), nil
-	return "", nil
+	str := response["id"].(string)
+
+	return str, nil
+	//return "", nil
 }
