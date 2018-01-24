@@ -35,7 +35,9 @@ func (bc *BigChainDB) request(action string, method string, sendData interface{}
 	println("url: ", url)
 	var req *http.Request
 	var err error
-	if sendData != nil {
+	if sendData == nil {
+		req, err = http.NewRequest(strings.ToUpper(method), url, nil)
+	} else {
 		b, err := json.Marshal(sendData)
 		if err != nil {
 			return errors.New("error")
@@ -46,8 +48,6 @@ func (bc *BigChainDB) request(action string, method string, sendData interface{}
 
 		buf = bytes.NewBuffer(b)
 		req, err = http.NewRequest(strings.ToUpper(method), url, buf)
-	} else {
-		req, err = http.NewRequest(strings.ToUpper(method), url, nil)
 	}
 	if err != nil {
 		return errors.New("error")
@@ -60,6 +60,7 @@ func (bc *BigChainDB) request(action string, method string, sendData interface{}
 			req.Header.Set(k, v)
 		}
 	}
+	req.Header.Add("accept", "*/*")
 	resp, err := client.Do(req)
 	if err != nil {
 		return errors.New("error")
@@ -85,43 +86,21 @@ func (bc *BigChainDB) GetServerInfo() (JsonObj, error) {
 	return tx, nil
 }
 
-// GET requests
 func (bc *BigChainDB) GetTransaction(transaction_id string) (JsonObj, error) {
 	req := "transactions/" + transaction_id
 	tx := make(JsonObj)
 	if err := bc.request(req, "GET", nil, &tx); err != nil {
 		return nil, err
 	}
-	/***********************
-	fulfilled, err := FulfilledTx(tx)
-	if err != nil {
-		return nil, err
-	}
-	if !fulfilled {
-		return nil, error.Error("unfulfilled")
-	}
-	*****************************/
 	return tx, nil
 }
 
-//operation: TRANSFER or CREATE
 func (bc *BigChainDB) GetListTransactions(assetId string, operation string) ([]JsonObj, error) {
 	req := fmt.Sprintf("transactions?operation=%v&asset_id=%v", operation, assetId)
 	var txs []JsonObj
 	if err := bc.request(req, "GET", nil, &txs); err != nil {
 		return nil, err
 	}
-	/*******************************
-	for _, tx := range txs {
-		fulfilled, err := FulfilledTx(tx)
-		if err != nil {
-			return nil, err
-		}
-		if !fulfilled {
-			return nil, common.Error("unfulfilled")
-		}
-	}
-	************************************/
 	return txs, nil
 }
 
@@ -158,8 +137,6 @@ func (bc *BigChainDB) HttpGetFilter(fn func(string) (JsonObj, error), pubkey cry
 	return jsonObjs, nil
 }
 
-// POST request
-
 func (bc *BigChainDB) NewTransaction(transaction JsonObj) (string, error) {
 	req := "transactions/"
 	var response JsonObj
@@ -168,7 +145,30 @@ func (bc *BigChainDB) NewTransaction(transaction JsonObj) (string, error) {
 		return "", err
 	}
 	str := response["id"].(string)
-
+	{
+		b, err1 := json.Marshal(response)
+		if err1 != nil {
+		}
+		println("TX Output: ", string(b), "\r\n++++\r\n")
+	}
 	return str, nil
-	//return "", nil
+}
+
+func (bc *BigChainDB) TransactionStatus(id string) bool {
+	req := fmt.Sprintf("statuses?transaction_id=%s", id)
+
+	var response JsonObj
+	response = make(JsonObj)
+	if err := bc.request(req, "GET", nil, &response); err != nil {
+		return false
+	}
+	str := response["status"].(string)
+	{
+		b, err1 := json.Marshal(response)
+		if err1 != nil {
+		}
+		println("status: ", string(b), "\r\n++++\r\n")
+	}
+	result := str == "valid"
+	return result
 }
