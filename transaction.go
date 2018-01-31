@@ -38,11 +38,11 @@ func NewCreateTransaction(asset JsonObj, metadata JsonObj) transaction {
 	return trasaction
 }
 
-func NewTransferTransaction(asset JsonObj, metadata JsonObj) transaction {
+func NewTransferTransaction(assetId string, metadata JsonObj) transaction {
 	trasaction := transaction{}
 	trasaction.operation = TRANSFER
 	trasaction.version = VERSION
-	trasaction.asset = JsonObj{"data": asset}
+	trasaction.asset = JsonObj{"id": assetId}
 	trasaction.metadata = metadata
 	trasaction.input = input{}
 	trasaction.output = output{}

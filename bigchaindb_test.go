@@ -44,4 +44,13 @@ func TestBigchain(t *testing.T) {
 		}
 	}
 	bcdb.GetTransaction(txId)
+
+	pub, priv = GenerateKeypair()
+	bobPublic := []PublicKey{pub}
+	//bobPrivate := []PrivateKey{priv}
+	trans_trans := NewTransferTransaction(txId, JsonObj{"TransMetaDataKey": "TransMetaDataValue"})
+
+	trans_trans.AddOwnerBefore(&alicePublic, &alicePrivate)
+	trans_trans.AddOwnerAfter(&bobPublic, 1)
+	trans_trans.Sign()
 }
