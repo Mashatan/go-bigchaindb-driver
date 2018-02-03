@@ -69,7 +69,7 @@ func (bc *BigChainDB) request(action string, method string, sendData interface{}
 
 	body, err := ioutil.ReadAll(resp.Body)
 
-	if resp.StatusCode < 200 && resp.StatusCode > 202 {
+	if resp.StatusCode < 200 || resp.StatusCode > 202 {
 		//fmt.Println(string(body))
 		return errors.New(string(body))
 	}

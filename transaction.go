@@ -20,6 +20,7 @@ const (
 type transaction struct {
 	id        string
 	asset     JsonObj
+	assetId   string
 	input     input
 	output    output
 	metadata  JsonObj
@@ -32,6 +33,7 @@ func NewCreateTransaction(asset JsonObj, metadata JsonObj) transaction {
 	trasaction.operation = CREATE
 	trasaction.version = VERSION
 	trasaction.asset = JsonObj{"data": asset}
+	trasaction.assetId = ""
 	trasaction.metadata = metadata
 	trasaction.input = input{}
 	trasaction.output = output{}
@@ -43,19 +45,20 @@ func NewTransferTransaction(assetId string, metadata JsonObj) transaction {
 	trasaction.operation = TRANSFER
 	trasaction.version = VERSION
 	trasaction.asset = JsonObj{"id": assetId}
+	trasaction.assetId = assetId
 	trasaction.metadata = metadata
 	trasaction.input = input{}
 	trasaction.output = output{}
 	return trasaction
 }
 
-func (t *transaction) AddOwnerAfter(publicKey *[]PublicKey, amount int) error {
-	t.output.Add(publicKey, amount)
+func (t *transaction) AddOwnerBefore(publicKey *[]PublicKey, privateKey *[]PrivateKey) error {
+	t.input.Add(publicKey, privateKey)
 	return nil
 }
 
-func (t *transaction) AddOwnerBefore(publicKey *[]PublicKey, privateKey *[]PrivateKey) error {
-	t.input.Add(publicKey, privateKey)
+func (t *transaction) AddOwnerAfter(publicKey *[]PublicKey, amount int) error {
+	t.output.Add(publicKey, amount)
 	return nil
 }
 

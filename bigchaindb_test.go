@@ -53,4 +53,11 @@ func TestBigchain(t *testing.T) {
 	trans_trans.AddOwnerBefore(&alicePublic, &alicePrivate)
 	trans_trans.AddOwnerAfter(&bobPublic, 1)
 	trans_trans.Sign()
+	trans_tx, _ := trans_trans.Generate(true, false)
+	txId1, err := bcdb.NewTransaction(trans_tx)
+	if err != nil {
+		println("Error :", err.Error())
+	} else {
+		println("Tx Id: ", string(txId1))
+	}
 }
