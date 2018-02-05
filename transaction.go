@@ -52,8 +52,8 @@ func NewTransferTransaction(assetId string, metadata JsonObj) transaction {
 	return trasaction
 }
 
-func (t *transaction) AddOwnerBefore(publicKey *[]PublicKey, privateKey *[]PrivateKey) error {
-	t.input.Add(publicKey, privateKey)
+func (t *transaction) AddOwnerBefore(publicKey *[]PublicKey, privateKey *[]PrivateKey, fulfill *JsonObj) error {
+	t.input.Add(publicKey, privateKey, fulfill)
 	return nil
 }
 

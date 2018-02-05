@@ -30,12 +30,12 @@ func (in *input) Sign(message []byte) error {
 	return nil
 }
 
-func (in *input) Add(publicKey *[]PublicKey, privateKey *[]PrivateKey) {
+func (in *input) Add(publicKey *[]PublicKey, privateKey *[]PrivateKey, fulfill *JsonObj) {
 	it := NewInputItem()
 	it.ownerBefores = publicKey
 	it.ownerPrivates = privateKey
 	it.ownerSignatures = nil
-	it.fulfills = nil
+	it.fulfills = fulfill
 	in.inputItems = append(in.inputItems, &it)
 }
 

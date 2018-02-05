@@ -20,7 +20,7 @@ func TestBigchain(t *testing.T) {
 	pub, priv := GenerateKeypair()
 	alicePublic := []PublicKey{pub}
 	alicePrivate := []PrivateKey{priv}
-	trans.AddOwnerBefore(&alicePublic, &alicePrivate)
+	trans.AddOwnerBefore(&alicePublic, &alicePrivate, nil)
 	trans.AddOwnerAfter(&alicePublic, 1)
 	trans.Sign()
 	tx, _ := trans.Generate(true, false)
@@ -50,7 +50,7 @@ func TestBigchain(t *testing.T) {
 	//bobPrivate := []PrivateKey{priv}
 	trans_trans := NewTransferTransaction(txId, JsonObj{"TransMetaDataKey": "TransMetaDataValue"})
 
-	trans_trans.AddOwnerBefore(&alicePublic, &alicePrivate)
+	trans_trans.AddOwnerBefore(&alicePublic, &alicePrivate, &JsonObj{"transaction_id": txId, "output_index": 0})
 	trans_trans.AddOwnerAfter(&bobPublic, 1)
 	trans_trans.Sign()
 	trans_tx, _ := trans_trans.Generate(true, false)

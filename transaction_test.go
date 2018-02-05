@@ -30,7 +30,7 @@ func TestTransaction(t *testing.T) {
 	pub, priv := GenerateKeypair()
 	alicePublic := []PublicKey{pub}
 	alicePrivate := []PrivateKey{priv}
-	trans.AddOwnerBefore(&alicePublic, &alicePrivate)
+	trans.AddOwnerBefore(&alicePublic, &alicePrivate, nil)
 	trans.AddOwnerAfter(&alicePublic, 1)
 	trans.Sign()
 
